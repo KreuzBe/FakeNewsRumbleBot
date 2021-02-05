@@ -51,5 +51,9 @@ public class GameContainer implements EventListener {
 
     }
 
+    public void addPlayer() {
+
+    }
+
 
 }
