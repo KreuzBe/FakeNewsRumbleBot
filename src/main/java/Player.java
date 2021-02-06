@@ -8,6 +8,10 @@ public class Player {
 
     private User user;
     private long joinMessageId;
+    private long voteMessageId;
+
+    private String submittedHeadline = "No Headline";
+    private int voteResultIndex = 0;
 
     public Player(User user) {
         if (playerCache.containsKey(user.getIdLong())) {
@@ -36,6 +40,30 @@ public class Player {
         this.joinMessageId = joinMessageId;
     }
 
+    public long getVoteMessageId() {
+        return voteMessageId;
+    }
+
+    public void setVoteMessageId(long voteMessageId) {
+        this.voteMessageId = voteMessageId;
+    }
+
+    public String getSubmittedHeadline() {
+        return submittedHeadline;
+    }
+
+    public void submitHeadline(String submittedHeadline) {
+        this.submittedHeadline = submittedHeadline;
+    }
+
+    public int getVoteResultIndex() {
+        return voteResultIndex;
+    }
+
+    public void setVoteResultIndex(int voteResultIndex) {
+        this.voteResultIndex = voteResultIndex;
+    }
+
     /**
      * Deletes this player from the player cache
      */
@@ -46,5 +74,6 @@ public class Player {
     public static Player getById(long id) {
         return playerCache.get(id);
     }
+
 
 }

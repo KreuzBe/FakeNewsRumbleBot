@@ -52,9 +52,9 @@ public class Main implements EventListener {
         if (event instanceof ReadyEvent) {
             // BOT IS READY, DO SETUP
             System.out.println("API is ready!");
-            currentGame = new GameContainer(5, jda);
+            currentGame = new GameContainer(1, jda);
         } else if (event instanceof MessageReceivedEvent) {
-            // MESSAGE EVENTS
+            // MESSAGE EVENT1
             Message m = ((MessageReceivedEvent) event).getMessage();
             if (!m.getAuthor().isBot()) {
                 if (m.getContentRaw().equalsIgnoreCase(CMD_JOIN))
