@@ -22,6 +22,7 @@ public class GameContainer implements EventListener {
     private String playerListString = "";
 
     private int maxRounds;
+    private int currentRound = 0;
 
     private GameState gameState = GameState.LOBBY;
 
@@ -43,8 +44,18 @@ public class GameContainer implements EventListener {
     }
 
     private void puzzle() {
-
-        //FIXME RESET GAME!!!
+        if (currentRound == maxRounds) {
+            //TODO END GAME
+            return;
+        }
+        currentRound++;
+        correctAnswer += ".";
+        correctVoters.clear();
+        for (Player pig : playersInGame) {
+            pig.setHasVoted(-1);
+            pig.setGotVoted(0);
+            pig.getVoters().clear();
+        }
 
         // Get headline
         // Puzzle

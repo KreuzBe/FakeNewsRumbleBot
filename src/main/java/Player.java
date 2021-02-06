@@ -111,6 +111,10 @@ public class Player {
         return voters;
     }
 
+    public void clearVoter() {
+        voters.clear();
+    }
+
     /**
      * Deletes this player from the player cache
      */

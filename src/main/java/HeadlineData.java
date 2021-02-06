@@ -9,18 +9,15 @@ import org.json.simple.JSONObject;
 import org.json.simple.parser.*;
 
 public class HeadlineData {
-    public HeadlineData() throws Exception
-    {
+    public HeadlineData() throws Exception {
         FileReader fileReader = new FileReader("assets/RealHeadlines.json");
         // parsing file "RealHeadlines.json"
-        JSONObject realHeadlinesJSON = (JSONObject)new JSONParser().parse(fileReader);
+        JSONObject realHeadlinesJSON = (JSONObject) new JSONParser().parse(fileReader);
         JSONArray realHeadlines = (JSONArray) realHeadlinesJSON.get("headlines");
         Iterator arrayItr = realHeadlines.iterator();
-        while (arrayItr.hasNext())
-        {
+        while (arrayItr.hasNext()) {
             Iterator<Map.Entry> mapItr = ((Map) arrayItr.next()).entrySet().iterator();
-            while (mapItr.hasNext())
-            {
+            while (mapItr.hasNext()) {
                 Map.Entry pair = mapItr.next();
                 System.out.println(pair.getKey() + " : " + pair.getValue());
             }

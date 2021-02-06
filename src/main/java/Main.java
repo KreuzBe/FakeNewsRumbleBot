@@ -36,15 +36,21 @@ public class Main implements EventListener {
 
     public static void main(String[] args)
             throws LoginException, InterruptedException {
-        if (args.length == 0) {
-            System.err.println("NO ARGUMENT!!! Please use a token as argument!");
-            System.exit(-1);
+        try {
+            new HeadlineData();
+        } catch (Exception e) {
+            e.printStackTrace();
         }
-        jda = JDABuilder.createDefault(args[0])
-                .addEventListeners(new Main()).setActivity(Activity.listening("Huey Lewis and the News!"))
-                .build();
-
-        jda.awaitReady();
+        return;
+//        if (args.length == 0) {
+//            System.err.println("NO ARGUMENT!!! Please use a token as argument!");
+//            System.exit(-1);
+//        }
+//        jda = JDABuilder.createDefault(args[0])
+//                .addEventListeners(new Main()).setActivity(Activity.listening("Huey Lewis and the News!"))
+//                .build();
+//
+//        jda.awaitReady();
     }
 
 
@@ -53,7 +59,7 @@ public class Main implements EventListener {
         if (event instanceof ReadyEvent) {
             // BOT IS READY, DO SETUP
             System.out.println("API is ready!");
-            currentGame = new GameContainer(1, jda);
+            currentGame = new GameContainer(3, jda);
         } else if (event instanceof MessageReceivedEvent) {
             // MESSAGE EVENT1
             Message m = ((MessageReceivedEvent) event).getMessage();
