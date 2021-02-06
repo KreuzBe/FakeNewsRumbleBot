@@ -1,5 +1,6 @@
 import net.dv8tion.jda.api.entities.User;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 
 public class Player {
@@ -10,11 +11,13 @@ public class Player {
     private long joinMessageId;
     private long voteMessageId;
 
-    private String submittedHeadline = "No Headline";
-    private int voteResultIndex = 0;
+    private String submittedHeadline = "Fake news";
+
+    private int score = 0;
 
     private int hasVoted = -1;
     private int gotVoted = 0;
+    private ArrayList<Player> voters = new ArrayList<>();
 
     public Player(User user) {
         if (playerCache.containsKey(user.getIdLong())) {
@@ -24,6 +27,7 @@ public class Player {
         }
         playerCache.put(user.getIdLong(), this);
         this.user = user;
+        submittedHeadline = submittedHeadline.concat(" " + user.getDiscriminator());
     }
 
 
@@ -59,12 +63,16 @@ public class Player {
         this.submittedHeadline = submittedHeadline;
     }
 
-    public int getVoteResultIndex() {
-        return voteResultIndex;
+    public int getScore() {
+        return score;
     }
 
-    public void setVoteResultIndex(int voteResultIndex) {
-        this.voteResultIndex = voteResultIndex;
+    public void setScore(int score) {
+        this.score = score;
+    }
+
+    public void addToScore(int value) {
+        score += value;
     }
 
     public int getHasVoted() {
@@ -89,6 +97,18 @@ public class Player {
 
     public void subtractGotVoted() {
         this.gotVoted--;
+    }
+
+    public void addVoter(Player player) {
+        voters.add(player);
+    }
+
+    public void removeVoter(Player player) {
+        voters.remove(player);
+    }
+
+    public ArrayList<Player> getVoters() {
+        return voters;
     }
 
     /**

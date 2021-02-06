@@ -1,5 +1,6 @@
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
+import net.dv8tion.jda.api.entities.Activity;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.events.GenericEvent;
 import net.dv8tion.jda.api.events.ReadyEvent;
@@ -22,7 +23,7 @@ public class Main implements EventListener {
      * Key: Discord ID of the bot
      * Value: Discord ID of the authorized User
      */
-    private static HashMap<Long, Long> authorizedUsers = new HashMap<>();
+    private static final HashMap<Long, Long> authorizedUsers = new HashMap<>();
 
     static {
         authorizedUsers.put(807342641904615431L, 196693552615391232L);
@@ -40,7 +41,7 @@ public class Main implements EventListener {
             System.exit(-1);
         }
         jda = JDABuilder.createDefault(args[0])
-                .addEventListeners(new Main())
+                .addEventListeners(new Main()).setActivity(Activity.listening("Huey Lewis and the News!"))
                 .build();
 
         jda.awaitReady();
