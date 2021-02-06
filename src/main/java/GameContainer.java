@@ -1,15 +1,11 @@
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDA;
-import net.dv8tion.jda.api.entities.Activity;
-import net.dv8tion.jda.api.entities.Emote;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.events.GenericEvent;
 import net.dv8tion.jda.api.events.message.react.MessageReactionAddEvent;
+import net.dv8tion.jda.api.events.message.react.MessageReactionRemoveEvent;
 import net.dv8tion.jda.api.hooks.EventListener;
-import net.dv8tion.jda.api.managers.EmoteManager;
-import net.dv8tion.jda.internal.entities.EmoteImpl;
-import net.dv8tion.jda.internal.managers.EmoteManagerImpl;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
@@ -28,6 +24,7 @@ public class GameContainer implements EventListener {
     private GameState gameState = GameState.LOBBY;
 
     private String correctAnswer = ":)";
+    private int correctVotes = 0;
     private Player[] voteResult;
 
     public GameContainer(int maxRounds, JDA jda) {
@@ -42,10 +39,6 @@ public class GameContainer implements EventListener {
             System.out.println("Round: " + i);
             gameState = GameState.PUZZLE;
             puzzle();
-            gameState = GameState.VOTE;
-            vote();
-            gameState = GameState.REVEAL;
-            reveal();
         }
         System.out.println("Ending Game... " + gameState);
     }
@@ -53,6 +46,8 @@ public class GameContainer implements EventListener {
     private void puzzle() {
         // Get headline
         // Puzzle
+        gameState = GameState.VOTE;
+        vote();
     }
 
     private void vote() {
@@ -80,11 +75,14 @@ public class GameContainer implements EventListener {
         for (Player pig : playersInGame) {
             Message voteMessage = pig.getUser().openPrivateChannel().complete().sendMessage(voteEmbed).complete();
             for (int i = 1; i <= voteResult.length; i++) {
-                //voteMessage.addReaction("U+003" + i + " U+FE0F U+20E3").queue();
                 voteMessage.addReaction("U+1f1e" + (5 + i)).queue();
             }
             pig.setVoteMessageId(voteMessage.getIdLong());
         }
+
+
+        gameState = GameState.REVEAL;
+        reveal();
     }
 
     private void reveal() {
@@ -93,9 +91,65 @@ public class GameContainer implements EventListener {
 
     @Override
     public void onEvent(@NotNull GenericEvent event) {
-        if (event instanceof MessageReactionAddEvent) {
-            System.out.println(((MessageReactionAddEvent) event).getReactionEmote());
+        if (gameState == GameState.VOTE) {
+            if (event instanceof MessageReactionAddEvent) {
+                System.out.println(event);
+                MessageReactionAddEvent mrae = (MessageReactionAddEvent) event;
+                if (mrae.getUser() != null && Player.getById(mrae.getUser().getIdLong()) != null) {
+                    Player player = Player.getById(mrae.getUser().getIdLong());
+                    if (mrae.getMessageIdLong() != player.getVoteMessageId()) {
+                        return;
+                    }
+                    String emoji = mrae.getReaction().getReactionEmote().getAsCodepoints();
+                    System.out.println(emoji);
+                    if (emoji.startsWith("U+1f1e")) {
+                        int vote = (emoji.charAt(emoji.length() - 1) - '6');
+                        if (vote < 0 || vote >= voteResult.length) {
+                            mrae.getUser().openPrivateChannel().complete().sendMessage("Please vote one of the options.").complete();
+                        } else if (player.getHasVoted() != -1) {
+                            if (voteResult[player.getHasVoted()] == null)
+                                correctVotes--;
+                            else
+                                voteResult[player.getHasVoted()].subtractGotVoted();
+
+                            player.setHasVoted(vote);
+                            if (voteResult[vote] == null)
+                                correctVotes++;
+                            else
+                                voteResult[vote].addGotVoted();
+                        } else {
+                            player.setHasVoted(vote);
+                            if (voteResult[vote] == null)
+                                correctVotes++;
+                            else
+                                voteResult[vote].addGotVoted();
+                        }
+                    }
+                    updateVoteMessages();
+                }
+            } else if (event instanceof MessageReactionRemoveEvent) {
+                MessageReactionRemoveEvent mrre = (MessageReactionRemoveEvent) event;
+                if (mrre.getUser() != null && Player.getById(mrre.getUser().getIdLong()) != null) {
+                    Player player = Player.getById(mrre.getUser().getIdLong());
+                    if (mrre.getMessageIdLong() != player.getVoteMessageId())
+                        return;
+                    String emoji = mrre.getReaction().getReactionEmote().getAsCodepoints();
+                    if (emoji.startsWith("U+1f1e")) {
+                        int vote = (emoji.charAt(emoji.length() - 1) - '6');
+                        if (vote == player.getHasVoted()) {
+                            if (voteResult[vote] == null)
+                                correctVotes--;
+                            else
+                                voteResult[vote].subtractGotVoted();
+                            player.setHasVoted(-1);
+                            updateVoteMessages();
+                        }
+                    }
+
+                }
+            }
         }
+
     }
 
     public void addPlayer(Player player) {
@@ -115,6 +169,14 @@ public class GameContainer implements EventListener {
         }
     }
 
+    public GameState getGameState() {
+        return gameState;
+    }
+
+    public void setGameState(GameState gameState) {
+        this.gameState = gameState;
+    }
+
     private void updatePlayerString() {
         playerListString = "";
         for (Player pig : playersInGame) {
@@ -122,11 +184,21 @@ public class GameContainer implements EventListener {
         }
     }
 
-    public GameState getGameState() {
-        return gameState;
-    }
+    private void updateVoteMessages() {
+        EmbedBuilder voteEBuilder = new EmbedBuilder();
+        voteEBuilder.setColor(0x0050F0);
+        voteEBuilder.setTitle("Vote the real headline:");
+        for (int i = 0; i < voteResult.length; i++) {
+            if (voteResult[i] == null) {
+                voteEBuilder.addField(":regional_indicator_" + (char) (i + 'a') + ": (" + correctVotes + ")", correctAnswer, false);
+            } else {
+                voteEBuilder.addField(":regional_indicator_" + (char) (i + 'a') + ": (" + voteResult[i].getGotVoted() + ")", voteResult[i].getSubmittedHeadline(), false);
+            }
+        }
 
-    public void setGameState(GameState gameState) {
-        this.gameState = gameState;
+        for (Player pig : playersInGame) {
+
+            pig.getUser().openPrivateChannel().complete().editMessageById(pig.getVoteMessageId(), voteEBuilder.build()).queue();
+        }
     }
 }

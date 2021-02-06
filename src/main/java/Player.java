@@ -13,6 +13,9 @@ public class Player {
     private String submittedHeadline = "No Headline";
     private int voteResultIndex = 0;
 
+    private int hasVoted = -1;
+    private int gotVoted = 0;
+
     public Player(User user) {
         if (playerCache.containsKey(user.getIdLong())) {
             user.openPrivateChannel().complete().sendMessage("You are already in a game... please leave the current game first!").complete();
@@ -62,6 +65,30 @@ public class Player {
 
     public void setVoteResultIndex(int voteResultIndex) {
         this.voteResultIndex = voteResultIndex;
+    }
+
+    public int getHasVoted() {
+        return hasVoted;
+    }
+
+    public void setHasVoted(int hasVoted) {
+        this.hasVoted = hasVoted;
+    }
+
+    public int getGotVoted() {
+        return gotVoted;
+    }
+
+    public void setGotVoted(int gotVoted) {
+        this.gotVoted = gotVoted;
+    }
+
+    public void addGotVoted() {
+        this.gotVoted++;
+    }
+
+    public void subtractGotVoted() {
+        this.gotVoted--;
     }
 
     /**
