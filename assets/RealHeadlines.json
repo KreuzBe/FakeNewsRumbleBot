@@ -1,0 +1,13 @@
+{
+    "headlines":
+    [
+        {
+            "text":"test headline 1",
+            "link":"https://www.google.com"
+        },
+        {
+            "text":"test headline 2",
+            "link":"https://www.google.com"
+        }        
+    ]
+}
