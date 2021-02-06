@@ -7,6 +7,8 @@ public class Player {
 
     public static HashMap<Long, Player> playerCache = new HashMap<>();
 
+    private GameContainer gc;
+
     private User user;
     private long joinMessageId;
     private long puzzleMessageId;
@@ -29,6 +31,13 @@ public class Player {
         submittedHeadline = submittedHeadline.concat(" " + user.getDiscriminator());
     }
 
+    public GameContainer getGc() {
+        return gc;
+    }
+
+    public void setGc(GameContainer gc) {
+        this.gc = gc;
+    }
 
     public User getUser() {
         return user;
@@ -120,6 +129,7 @@ public class Player {
      */
     public void removeFromCache() {
         playerCache.remove(user.getIdLong());
+        this.setGc(null);
     }
 
     public static Player getById(long id) {

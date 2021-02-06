@@ -9,6 +9,7 @@ import net.dv8tion.jda.api.hooks.EventListener;
 import org.jetbrains.annotations.NotNull;
 
 import javax.security.auth.login.LoginException;
+import java.util.ArrayList;
 import java.util.HashMap;
 
 /**
@@ -32,6 +33,7 @@ public class Main implements EventListener {
 
     private static JDA jda;
 
+
     private GameContainer currentGame;
 
     public static void main(String[] args)
@@ -54,7 +56,7 @@ public class Main implements EventListener {
         if (event instanceof ReadyEvent) {
             // BOT IS READY, DO SETUP
             System.out.println("API is ready!");
-            currentGame = new GameContainer(1, 3, jda);
+            currentGame = new GameContainer(1, 2, jda);
         } else if (event instanceof MessageReceivedEvent) {
             // MESSAGE EVENT
             Message m = ((MessageReceivedEvent) event).getMessage();

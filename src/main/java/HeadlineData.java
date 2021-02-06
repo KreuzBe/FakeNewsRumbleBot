@@ -11,13 +11,13 @@ import org.json.simple.parser.*;
 
 public class HeadlineData {
 
-    public static final String[] componentTypes = 
+    public static final String[] componentTypes =
             {"actor", "action", "object", "descriptor"};
 
     private ArrayList<RealHeadline> realHeadlines;
     private HashMap<String, ArrayList<String>> components;
 
-    public HeadlineData() throws FileNotFoundException {
+    public HeadlineData() throws IOException, ParseException {
         realHeadlines = new ArrayList<RealHeadline>();
         components = new HashMap<String, ArrayList<String>>();
         FileReader fileReader = new FileReader("assets/RealHeadlines.json");
@@ -27,17 +27,16 @@ public class HeadlineData {
         Iterator arrayItr = realHeadlines.iterator();
         while (arrayItr.hasNext()) {
             // save the data about the headline in a map            
-            HashMap<String, String> headlineMap = (HashMap) arrayItr.next();  
+            HashMap<String, String> headlineMap = (HashMap) arrayItr.next();
 
             // transfer data from map to headline object and component dictionary
-            RealHeadline realHeadline = new RealHeadline();          
-            for (int i = 0; i < componentTypes.length; i++){
+            RealHeadline realHeadline = new RealHeadline();
+            for (int i = 0; i < componentTypes.length; i++) {
                 String componentText = headlineMap.get(componentTypes[i]);
-                if (componentText != null){
+                if (componentText != null) {
                     realHeadline.AddComponent(componentTypes[i], componentText);
                     ArrayList<String> componentsOfType = components.get(componentTypes[i]);
-                    if (componentsOfType == null)
-                    {
+                    if (componentsOfType == null) {
                         componentsOfType = new ArrayList<String>();
                     }
                     componentsOfType.add(componentText);
@@ -45,7 +44,7 @@ public class HeadlineData {
                 }
             }
             String link = headlineMap.get("link");
-            if (link != null){
+            if (link != null) {
                 realHeadline.SetLink(link);
             }
 
@@ -54,15 +53,14 @@ public class HeadlineData {
         }
     }
 
-    public RealHeadline GetRandomRealHeadline(){
+    public RealHeadline GetRandomRealHeadline() {
         int randIndex = (int) Math.floor(Math.random() * realHeadlines.size());
         return realHeadlines.get(randIndex);
     }
 
-    public String GetRandomHeadlineComponent(String componentType){
+    public String GetRandomHeadlineComponent(String componentType) {
         ArrayList<String> componentsOfReqType = components.get(componentType);
-        if (componentsOfReqType == null)
-        {
+        if (componentsOfReqType == null) {
             return null;
         }
         int randIndex = (int) Math.floor(Math.random() * componentsOfReqType.size());

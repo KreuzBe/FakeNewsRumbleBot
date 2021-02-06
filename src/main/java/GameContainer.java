@@ -7,11 +7,25 @@ import net.dv8tion.jda.api.events.message.react.MessageReactionAddEvent;
 import net.dv8tion.jda.api.events.message.react.MessageReactionRemoveEvent;
 import net.dv8tion.jda.api.hooks.EventListener;
 import org.jetbrains.annotations.NotNull;
+import org.json.simple.parser.ParseException;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 
 public class GameContainer implements EventListener {
     private final static int UNICODE_A = 0x1f1e6; // A is the first letter of the alphabet.
+
+    private static HeadlineData headlineData;
+
+//    static {
+//        try {
+//         //   headlineData = new HeadlineData();
+//        } catch (IOException | ParseException e) {
+//            e.printStackTrace();
+//        }
+//    }
+
 
     public enum GameState {LOBBY, PUZZLE, VOTE, REVEAL}
 
@@ -25,6 +39,7 @@ public class GameContainer implements EventListener {
 
     private GameState gameState = GameState.LOBBY;
 
+    private RealHeadline correctHeadline;
     private String correctAnswer = "I am the real headline!";
     private ArrayList<Player> correctVoters = new ArrayList<>(); // those who voted for the correct headline
     private Player[] voteResult; // the players how they appear in the vote list
@@ -33,6 +48,11 @@ public class GameContainer implements EventListener {
         this.maxRounds = maxRounds;
         this.maxPlayers = maxPlayers;
         this.jda = jda;
+        try {
+            headlineData = new HeadlineData();
+        } catch (IOException | ParseException e) {
+            e.printStackTrace();
+        }
         jda.addEventListener(this);
     }
 
@@ -51,6 +71,10 @@ public class GameContainer implements EventListener {
             pig.clearVoter();
         }
 // Start Puzzle
+
+
+        jda.shutdown();
+        System.exit(0);
         EmbedBuilder puzzleEBuilder;
         for (Player pig : playersInGame) {
             puzzleEBuilder = new EmbedBuilder().setColor(0xa0a0a0);
@@ -89,8 +113,8 @@ public class GameContainer implements EventListener {
             solutionEBuilder = new EmbedBuilder().setColor(0xFFFF00).addField("Your current solution:", pig.getSubmittedHeadline(), false);
             pig.setPuzzleMessageId(pig.getUser().openPrivateChannel().complete().sendMessage(solutionEBuilder.build()).complete().getIdLong());
         }
-        for (int i = 32; i >= 0; i--) { //TODO time depending on gaps
-            int clock = (int) ((i / 32f) * 12);
+        for (int i = 24; i >= 0; i--) { //TODO time depending on gaps
+            int clock = (int) ((i / 24) * 12);
             for (Player pig : playersInGame) {
                 pig.getUser().openPrivateChannel().complete().editMessageById(pig.getPuzzleMessageId(), "Time left: :clock" + (clock == 0 ? 12 : clock) + ": (" + i + ")").complete();
             }
@@ -100,7 +124,9 @@ public class GameContainer implements EventListener {
                 e.printStackTrace();
             }
         }
-
+        for (Player pig : playersInGame) {
+            pig.getUser().openPrivateChannel().complete().editMessageById(pig.getPuzzleMessageId(), "-").complete();
+        }
         gameState = GameState.VOTE;
         vote();
     }
@@ -146,6 +172,9 @@ public class GameContainer implements EventListener {
                 e.printStackTrace();
             }
         }
+        for (Player pig : playersInGame) {
+            pig.getUser().openPrivateChannel().complete().editMessageById(pig.getVoteMessageId(), "-").complete();
+        }
 
         for (Player pig : playersInGame) {
             pig.getUser().openPrivateChannel().complete().sendMessage("Voting time is over!!!").complete();
@@ -185,6 +214,7 @@ public class GameContainer implements EventListener {
             //TODO END GAME
             for (Player pig : playersInGame) {
                 pig.getUser().openPrivateChannel().complete().sendMessage("The game is now over\nYou have " + pig.getScore() + " points!").complete();
+                pig.removeFromCache();
             }
             return;
         }
@@ -199,6 +229,9 @@ public class GameContainer implements EventListener {
                 e.printStackTrace();
             }
         }
+        for (Player pig : playersInGame) {
+            pig.getUser().openPrivateChannel().complete().editMessageById(pig.getResultMessageId(), "-").complete();
+        }
         gameState = GameState.PUZZLE;
         puzzle();
 
@@ -206,17 +239,34 @@ public class GameContainer implements EventListener {
 
     @Override
     public void onEvent(@NotNull GenericEvent event) {
-        if (gameState == GameState.VOTE) {
+        if (gameState == GameState.PUZZLE) {
             if (event instanceof MessageReactionAddEvent) {
                 MessageReactionAddEvent mrae = (MessageReactionAddEvent) event;
                 if (mrae.getUser() != null && Player.getById(mrae.getUser().getIdLong()) != null) {
                     Player player = Player.getById(mrae.getUser().getIdLong());
-                    if (mrae.getMessageIdLong() != player.getVoteMessageId()) {
+                    if (player.getGc() == this) {
+                        if (mrae.getReactionEmote().isEmoji()) {
+                            String emoji = mrae.getReaction().getReactionEmote().getAsCodepoints();
+                            int selectedOption = Integer.parseInt(emoji.substring(2), 16) - UNICODE_A;
+                            if (selectedOption < 0) // TODO assert selectedOption is in right range
+                                mrae.getUser().openPrivateChannel().complete().sendMessage("Please vote one of the options.").complete();
+
+                            // TODO handle options
+
+                        }
+                    }
+                }
+            }
+        } else if (gameState == GameState.VOTE) {
+            if (event instanceof MessageReactionAddEvent) {
+                MessageReactionAddEvent mrae = (MessageReactionAddEvent) event;
+                if (mrae.getUser() != null && Player.getById(mrae.getUser().getIdLong()) != null) {
+                    Player player = Player.getById(mrae.getUser().getIdLong());
+                    if (mrae.getMessageIdLong() != player.getVoteMessageId() || player.getGc() != this) {
                         return;
                     }
-                    String emoji = mrae.getReaction().getReactionEmote().getAsCodepoints();
-                    System.out.println(emoji);
-                    if (emoji.startsWith("U+")) {
+                    if (mrae.getReactionEmote().isEmoji()) {
+                        String emoji = mrae.getReaction().getReactionEmote().getAsCodepoints();
                         int vote = Integer.parseInt(emoji.substring(2), 16) - UNICODE_A;
                         System.out.println(vote);
                         if (vote < 0 || vote >= voteResult.length) {
@@ -248,7 +298,7 @@ public class GameContainer implements EventListener {
                 MessageReactionRemoveEvent mrre = (MessageReactionRemoveEvent) event;
                 if (mrre.getUser() != null && Player.getById(mrre.getUser().getIdLong()) != null) {
                     Player player = Player.getById(mrre.getUser().getIdLong());
-                    if (mrre.getMessageIdLong() != player.getVoteMessageId())
+                    if (mrre.getMessageIdLong() != player.getVoteMessageId() || player.getGc() != this)
                         return;
                     String emoji = mrre.getReaction().getReactionEmote().getAsCodepoints();
                     if (emoji.startsWith("U+")) {
@@ -272,7 +322,7 @@ public class GameContainer implements EventListener {
 
     public void addPlayer(Player player) {
         playersInGame.add(player);
-
+        player.setGc(this);
         String playerListString = "";
         for (Player pig : playersInGame) {
             playerListString = playerListString.concat("> " + pig.getUser().getName() + "\n");
