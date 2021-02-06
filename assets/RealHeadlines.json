@@ -1,43 +1,76 @@
 {
   "headlines": [
     {
-      "text": "Canberra man takes three months to discover $1.6 million Saturday Lotto win tucked away in his drawer",
-      "link": "https://mediacentre.thelott.com/media-releases/canberra-man-takes-three-months-to-discover-saturday-lotto-win-tucked-away-in-his-drawer/"
+      "text": "Canberra Man Takes Three Months to Discover $1.6 Million Saturday Lotto Win Tucked Away in His Drawer",
+      "actor": "Canberra Man",
+      "action": "Takes Three Months to Discover",
+      "object": "$1.6 Million Saturday Lotto Win",
+      "descriptor": "Tucked Away in His Drawer",
+      "link": "https://mediacentre.thelott.com/media-releases/canbedescriptorrra-man-takes-three-months-to-discover-saturday-lotto-win-tucked-away-in-his-drawer/"
     },
     {
       "text": "Norwegian runner sets world record for fastest barefoot half-marathon on snow",
+      "actor": "Norwegian runner",
+      "action": "sets world record for",
+      "object": "fastest barefoot half-marathon",
+      "descriptor": "on snow",
       "link": "https://runningmagazine.ca/sections/runs-races/norwegian-runner-sets-world-record-for-fastest-barefoot-half-marathon-on-snow/"
     },
     {
       "text": "94-year-old Canadian man confirmed as oldest male waterskier ",
-      "link": "https://www.guinnessworldrecords.com/news/2021/2/94-year-old-canadian-man-confirmed-as-oldest-male-water-skier-647747"
+      "actor": "94-year-old Canadian man",
+      "action": "confirmed as",
+      "object": "oldest male waterskier",
+      "link": "https://www.guinnessworldrecodescriptorrds.com/news/2021/2/94-year-old-canadian-man-confirmed-as-oldest-male-water-skier-647747"
     },
     {
       "text": "Viral Fresno Tik Tok video helps woman find missing package",
+      "actor": "Viral Fresno Tik Tok video",
+      "action": "helps woman find",
+      "object": "missing package",
       "link": "https://kmph.com/news/local/viral-fresno-tik-tok-video-helps-woman-find-missing-package"
     },
     {
       "text": "Spectacular display of origami dogs sets a record in Brazil",
+      "actor": "Spectucular display of origami dogs",
+      "action": "sets a record",
+      "descriptor": "in Brazil",
       "link": "https://www.guinnessworldrecords.com/news/2021/2/spectacular-display-of-origami-dogs-sets-a-record-in-brazil"
     },
     {
       "text": "Cactus smuggler sentenced for importing illegal plants",
-      "link": "https://www.mpi.govt.nz/news/media-releases/cactus-smuggler-sentenced-for-importing-illegal-plants/"
+      "actor": "Cactul smuggler",
+      "action": "sentenced for importing",
+      "descriptor": "illegal plants",
+      "link": "https://www.mpi.govt.nz/news/mediadescriptor-releases/cactus-smuggler-sentenced-for-importing-illegal-plants/"
     },
     {
       "text": "10-foot gator removed from lake in Plantation neighborhood",
+      "actor": "10-foot gator",
+      "action": "removed from lake",
+      "descriptor": "in Plantation neighborhood",
       "link": "https://www.local10.com/news/local/2021/02/02/10-foot-gator-removed-from-lake-in-plantation-neighborhood/"
     },
     {
       "text": "4-year-old discovers dinosaur footprint on the beach",
+      "actor": "4-year-old",
+      "action": "discovers",
+      "object": "dinosaur",
+      "descriptor": "on the beach",
       "link": "https://www.cbc.ca/radio/asithappens/as-it-happens-monday-edition-1.5896324/daddy-look-at-this-4-year-old-discovers-dinosaur-footprint-on-the-beach-1.5896347"
     },
     {
       "text": "Sebastian Man Finds Message in a Bottle on Beach",
+      "actor": "Sebastian Man",
+      "action": "Finds",
+      "object": "Message",
+      "descriptor": "in a Bottle on Beach",
       "link": "https://www.sebastiandaily.com/inlet/sebastian-man-finds-message-in-a-bottle-on-beach-27147/"
     },
     {
       "text": "The claim: Biden said, 'I don’t know what I’m signing here' while signing a document",
+      "actor": "The claim: Biden",
+      "action": "Said, 'I don’t know what I’m signing here' While Signing a Document",
       "link": "https://eu.usatoday.com/story/news/factcheck/2021/02/04/fact-check-experts-say-audio-biden-signing-ceremony-unclear/4372584001/"
     }
   ]
