@@ -9,6 +9,7 @@ public class Player {
 
     private User user;
     private long joinMessageId;
+    private long puzzleMessageId;
     private long voteMessageId;
     private long resultMessageId;
 
@@ -43,6 +44,14 @@ public class Player {
 
     public void setJoinMessageId(long joinMessageId) {
         this.joinMessageId = joinMessageId;
+    }
+
+    public long getPuzzleMessageId() {
+        return puzzleMessageId;
+    }
+
+    public void setPuzzleMessageId(long puzzleMessageId) {
+        this.puzzleMessageId = puzzleMessageId;
     }
 
     public long getVoteMessageId() {

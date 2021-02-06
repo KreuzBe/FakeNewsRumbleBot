@@ -54,7 +54,7 @@ public class Main implements EventListener {
         if (event instanceof ReadyEvent) {
             // BOT IS READY, DO SETUP
             System.out.println("API is ready!");
-            currentGame = new GameContainer(3, 2, jda);
+            currentGame = new GameContainer(1, 3, jda);
         } else if (event instanceof MessageReceivedEvent) {
             // MESSAGE EVENT
             Message m = ((MessageReceivedEvent) event).getMessage();
@@ -76,6 +76,7 @@ public class Main implements EventListener {
                     long jdaId = jda.getSelfUser().getIdLong();
                     if (authorizedUsers.containsKey(jdaId) && authorizedUsers.get(jdaId) == m.getAuthor().getIdLong()) {
                         System.out.println("Stopping...");
+                        jda.shutdown();
                         System.exit(0);
                     }
                 }
