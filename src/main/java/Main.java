@@ -36,21 +36,16 @@ public class Main implements EventListener {
 
     public static void main(String[] args)
             throws LoginException, InterruptedException {
-        try {
-            new HeadlineData();
-        } catch (Exception e) {
-            e.printStackTrace();
+
+        if (args.length == 0) {
+            System.err.println("NO ARGUMENT!!! Please use a token as argument!");
+            System.exit(-1);
         }
-        return;
-//        if (args.length == 0) {
-//            System.err.println("NO ARGUMENT!!! Please use a token as argument!");
-//            System.exit(-1);
-//        }
-//        jda = JDABuilder.createDefault(args[0])
-//                .addEventListeners(new Main()).setActivity(Activity.listening("Huey Lewis and the News!"))
-//                .build();
-//
-//        jda.awaitReady();
+        jda = JDABuilder.createDefault(args[0])
+                .addEventListeners(new Main()).setActivity(Activity.listening("Huey Lewis and the News!"))
+                .build();
+
+        jda.awaitReady();
     }
 
 
@@ -59,12 +54,12 @@ public class Main implements EventListener {
         if (event instanceof ReadyEvent) {
             // BOT IS READY, DO SETUP
             System.out.println("API is ready!");
-            currentGame = new GameContainer(3, jda);
+            currentGame = new GameContainer(3, 2, jda);
         } else if (event instanceof MessageReceivedEvent) {
-            // MESSAGE EVENT1
+            // MESSAGE EVENT
             Message m = ((MessageReceivedEvent) event).getMessage();
             if (!m.getAuthor().isBot()) {
-                if (m.getContentRaw().equalsIgnoreCase(CMD_JOIN))
+                if (m.getContentRaw().equalsIgnoreCase(CMD_JOIN)) {
                     // JOIN REQUEST
                     if (Player.getById(m.getAuthor().getIdLong()) != null) {
                         // JOIN DENIED: CANT JOIN TWICE
@@ -76,12 +71,13 @@ public class Main implements EventListener {
                         // SUCCESSFUlLY JOINED
                         currentGame.addPlayer(new Player(m.getAuthor()));
                     }
-            } else if (m.getContentRaw().equalsIgnoreCase(CMD_KILL)) {
-                // KILL COMMANDS
-                long jdaId = jda.getSelfUser().getIdLong();
-                if (authorizedUsers.containsKey(jdaId) && authorizedUsers.get(jdaId) == m.getAuthor().getIdLong()) {
-                    System.out.println("Stopping...");
-                    System.exit(0);
+                } else if (m.getContentRaw().equalsIgnoreCase(CMD_KILL)) {
+                    // KILL COMMANDS
+                    long jdaId = jda.getSelfUser().getIdLong();
+                    if (authorizedUsers.containsKey(jdaId) && authorizedUsers.get(jdaId) == m.getAuthor().getIdLong()) {
+                        System.out.println("Stopping...");
+                        System.exit(0);
+                    }
                 }
             }
         }

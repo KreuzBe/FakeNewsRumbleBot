@@ -10,20 +10,18 @@ public class Player {
     private User user;
     private long joinMessageId;
     private long voteMessageId;
+    private long resultMessageId;
 
     private String submittedHeadline = "Fake news";
 
     private int score = 0;
 
-    private int hasVoted = -1;
-    private int gotVoted = 0;
+    private int voteTarget = -1;
     private ArrayList<Player> voters = new ArrayList<>();
 
     public Player(User user) {
         if (playerCache.containsKey(user.getIdLong())) {
             user.openPrivateChannel().complete().sendMessage("You are already in a game... please leave the current game first!").complete();
-            System.err.println(user.getName() + " has tried to enter a second game!");
-            // TODO tell the user how to leave the game
         }
         playerCache.put(user.getIdLong(), this);
         this.user = user;
@@ -55,6 +53,14 @@ public class Player {
         this.voteMessageId = voteMessageId;
     }
 
+    public long getResultMessageId() {
+        return resultMessageId;
+    }
+
+    public void setResultMessageId(long resultMessageId) {
+        this.resultMessageId = resultMessageId;
+    }
+
     public String getSubmittedHeadline() {
         return submittedHeadline;
     }
@@ -75,29 +81,14 @@ public class Player {
         score += value;
     }
 
-    public int getHasVoted() {
-        return hasVoted;
+    public int getVotedTarget() {
+        return voteTarget;
     }
 
-    public void setHasVoted(int hasVoted) {
-        this.hasVoted = hasVoted;
+    public void setVotedTarget(int hasVoted) {
+        this.voteTarget = hasVoted;
     }
 
-    public int getGotVoted() {
-        return gotVoted;
-    }
-
-    public void setGotVoted(int gotVoted) {
-        this.gotVoted = gotVoted;
-    }
-
-    public void addGotVoted() {
-        this.gotVoted++;
-    }
-
-    public void subtractGotVoted() {
-        this.gotVoted--;
-    }
 
     public void addVoter(Player player) {
         voters.add(player);
