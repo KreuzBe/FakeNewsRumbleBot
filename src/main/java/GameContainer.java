@@ -73,10 +73,11 @@ public class GameContainer implements EventListener {
         correctAnswer = correctHeadline.GetText();
         components.clear();
         componentTypes.clear();
-        correctHeadline.GetComponents().forEach((a, b) -> {
-            components.add(b);
-            componentTypes.add(a);
-        });
+        for (String type : correctHeadline.getTypeOrder()) {
+            components.add(correctHeadline.GetComponents().get(type));
+            componentTypes.add(type);
+        }
+
 
         // Missing Component
         components.set((int) (Math.random() * components.size()), null);
@@ -115,7 +116,7 @@ public class GameContainer implements EventListener {
                     for (int i = 0; i < 3 - (comPerGap % 3); i++) { // fill the empty spaces (embeds can only by three inline)
                         puzzleEBuilder.addBlankField(true);
                     }
-                    puzzleEBuilder.addBlankField(false);
+                    //  puzzleEBuilder.addBlankField(false);
 
                     Message wordsMessage = pig.getUser().openPrivateChannel().complete().sendMessage(puzzleEBuilder.build()).complete();
                     for (int i = 0; i < comPerGap; i++) {
@@ -129,7 +130,7 @@ public class GameContainer implements EventListener {
         for (Player pig : playersInGame) {
             solutionEBuilder = new EmbedBuilder();
             solutionEBuilder.setColor(0xFFFF00);
-            solutionEBuilder.addField("Your current solution:", "```" + getPlayerHeadline(pig) + "```", false);
+            solutionEBuilder.addField("Your current solution:", "```" + getPlayerHeadline(pig, true) + "```", false);
             pig.setPuzzleMessageId(pig.getUser().openPrivateChannel().complete().sendMessage(solutionEBuilder.build()).complete().getIdLong());
         }
 
@@ -168,7 +169,7 @@ public class GameContainer implements EventListener {
             if (voteResult[i] == null) {
                 voteEBuilder.addField(":regional_indicator_" + (char) (i + 'a') + ":", correctAnswer, false);
             } else {
-                voteEBuilder.addField(":regional_indicator_" + (char) (i + 'a') + ":", getPlayerHeadline(voteResult[i]), false);
+                voteEBuilder.addField(":regional_indicator_" + (char) (i + 'a') + ":", getPlayerHeadline(voteResult[i], false), false);
 
             }
         }
@@ -401,7 +402,7 @@ public class GameContainer implements EventListener {
         EmbedBuilder solutionEBuilder = new EmbedBuilder();
 
         solutionEBuilder.setColor(0xFFFF00);
-        solutionEBuilder.addField("Your current solution:", "```" + getPlayerHeadline(p) + "```", false);
+        solutionEBuilder.addField("Your current solution:", "**" + getPlayerHeadline(p, true) + "**", false);
         p.getUser().openPrivateChannel().complete().editMessageById(p.getPuzzleMessageId(), solutionEBuilder.build()).complete();
 
 
@@ -414,7 +415,7 @@ public class GameContainer implements EventListener {
                 if (voteResult[i] == null) {
                     voteEBuilder.addField(":regional_indicator_" + (char) (i + 'a') + ":" + (pig.getVotedTarget() == i ? " [selected]" : ""), correctAnswer, true);
                 } else {
-                    voteEBuilder.addField(":regional_indicator_" + (char) (i + 'a') + ":" + (pig.getVotedTarget() == i ? " [selected]" : ""), getPlayerHeadline(voteResult[i]), true);
+                    voteEBuilder.addField(":regional_indicator_" + (char) (i + 'a') + ":" + (pig.getVotedTarget() == i ? " [selected]" : ""), getPlayerHeadline(voteResult[i], false), true);
                 }
 
                 String voterString = "";
@@ -430,15 +431,21 @@ public class GameContainer implements EventListener {
         }
     }
 
-    private String getPlayerHeadline(Player p) {
+    private String getPlayerHeadline(Player p, boolean showComponent) {
         String pigHeadline = "";
         for (int i = 0; i < components.size(); i++) {
             if (components.get(i) == null) {
+                if (showComponent)
+                    pigHeadline += "`";
                 if (p.getSelectedComponent(componentTypes.get(i)) == null) {
-                    pigHeadline += "==?== ";
+                    pigHeadline += "==?==";
                 } else {
-                    pigHeadline += p.getSelectedComponent(componentTypes.get(i)) + " ";
+                    pigHeadline += p.getSelectedComponent(componentTypes.get(i));
                 }
+                if (showComponent)
+                    pigHeadline += "` ";
+                else
+                    pigHeadline += " ";
             } else {
                 pigHeadline += components.get(i) + " ";
             }

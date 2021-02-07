@@ -2,6 +2,7 @@ import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
 import net.dv8tion.jda.api.entities.Activity;
+import net.dv8tion.jda.api.entities.ChannelType;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.events.GenericEvent;
 import net.dv8tion.jda.api.events.ReadyEvent;
@@ -76,6 +77,12 @@ public class Main implements EventListener {
                         m.getAuthor().openPrivateChannel().complete().sendMessage("The game is already full. We are sorry...\nPlease wait.").complete();
                     } else {
                         // SUCCESSFUlLY JOINED
+                        if (m.getChannelType() != ChannelType.PRIVATE) {
+                            m.getChannel().sendMessage("Please use a private channel to play the game. There might be other bots listening here").complete();
+                            m.getAuthor().openPrivateChannel().complete().sendMessage("Hello my friend. Let's play our game here?").complete();
+                            return;
+                        }
+
                         if (currentGame == null)
                             currentGame = new GameContainer(maxRounds, maxPlayers, jda);
                         currentGame.addPlayer(new Player(m.getAuthor()));
@@ -98,9 +105,11 @@ public class Main implements EventListener {
                 } else if (m.getContentRaw().toLowerCase(Locale.ROOT).startsWith(CMD_HELP)) {
                     EmbedBuilder helpEBuilder = new EmbedBuilder().setColor(0x55FF66)
                             .setTitle("How to play:")
+                            .addField("Join a game:", "You can join using +\"" + CMD_JOIN + "\" in a `private chat` with the bot. To change the amounts of players use \"" + CMD_SET_MAX_PLAYER + " <integer>\". To change the total amount of rounds per game, use \"" + CMD_SET_MAX_ROUNDS + " <integer>\".", false)
                             .addField("Make up your own headline!", "In the first phase of the game, you get a headline with a gap and a word pallet to chose from. The words can be selected by adding a reaction with the corresponding letter to the word list. The selected word is put in the gap. After a certain time, you are not able to select another word. Then the next phase begins.", false)
                             .addField("Find the correct headline!", "Now, you get multiple headlines similar to each other. These are the ones created by the other players and the \"real\" headline we got from the internet. You have to choose which headline is the real one, by adding a reaction with the corresponding letter. After a certain time, you are not able to choose. ", false)
                             .addField("Seeing the results:", "You get a overview about what points you scored (you fooled other players or guessed the right headline). You now get to see the original headline and a link to the page it appeared on. In case there are multiple rounds, the next one starts after a certain time.", false);
+                    m.getChannel().sendMessage(helpEBuilder.build()).complete();
                 } else if (m.getContentRaw().equalsIgnoreCase(CMD_KILL)) {
                     // KILL COMMANDS
                     long jdaId = jda.getSelfUser().getIdLong();
