@@ -2,6 +2,7 @@ import net.dv8tion.jda.api.entities.User;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Map;
 
 public class Player {
 
@@ -21,6 +22,12 @@ public class Player {
 
     private int voteTarget = -1;
     private ArrayList<Player> voters = new ArrayList<>();
+
+    private HashMap<String, ArrayList<String>> possibleComponents = new HashMap<>();
+    private HashMap<String, String> selectedComponents = new HashMap<>();
+
+    // TODO HashMap for ct;
+    private HashMap<Long, String> messageCT = new HashMap<>();
 
     public Player(User user) {
         if (playerCache.containsKey(user.getIdLong())) {
@@ -122,6 +129,38 @@ public class Player {
 
     public void clearVoter() {
         voters.clear();
+    }
+
+    public ArrayList<String> getPossibleComponents(String type) {
+        return possibleComponents.get(type);
+    }
+
+    public void setPossibleComponents(String type, ArrayList<String> possibleComponents) {
+        this.possibleComponents.put(type, possibleComponents);
+    }
+
+    public void setSelectedComponent(String type, String value) {
+        this.selectedComponents.put(type, value);
+    }
+
+    public String getSelectedComponent(String type) {
+        return selectedComponents.get(type);
+    }
+
+    public void setMessageComponentType(long id, String type) {
+        messageCT.put(id, type);
+    }
+
+    public String getMessageComponentType(long id) {
+        return messageCT.get(id);
+    }
+
+    public long getMessageComponentType(String ct) {
+        for (Map.Entry<Long, String> e : messageCT.entrySet()) {
+            if (e.getValue().equals(ct))
+                return e.getKey();
+        }
+        return 0;
     }
 
     /**

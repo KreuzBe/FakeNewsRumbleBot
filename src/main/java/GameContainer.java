@@ -9,26 +9,18 @@ import net.dv8tion.jda.api.hooks.EventListener;
 import org.jetbrains.annotations.NotNull;
 import org.json.simple.parser.ParseException;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+
+// TODO CLOCK
+// TODO LINK
 
 public class GameContainer implements EventListener {
     private final static int UNICODE_A = 0x1f1e6; // A is the first letter of the alphabet.
 
     private static HeadlineData headlineData;
 
-//    static {
-//        try {
-//         //   headlineData = new HeadlineData();
-//        } catch (IOException | ParseException e) {
-//            e.printStackTrace();
-//        }
-//    }
-
-
     public enum GameState {LOBBY, PUZZLE, VOTE, REVEAL}
-
 
     private JDA jda; // JDA required by discord bot
     private ArrayList<Player> playersInGame = new ArrayList<>(); // all participants in current game
@@ -37,12 +29,18 @@ public class GameContainer implements EventListener {
     private int currentRound = 0;
     private int maxPlayers = 2;
 
+    int comPerGap = 6;
+
+
     private GameState gameState = GameState.LOBBY;
 
     private RealHeadline correctHeadline;
     private String correctAnswer = "I am the real headline!";
     private ArrayList<Player> correctVoters = new ArrayList<>(); // those who voted for the correct headline
     private Player[] voteResult; // the players how they appear in the vote list
+
+    private ArrayList<String> components = new ArrayList<>();
+    private ArrayList<String> componentTypes = new ArrayList<>();
 
     public GameContainer(int maxRounds, int maxPlayers, JDA jda) {
         this.maxRounds = maxRounds;
@@ -71,48 +69,68 @@ public class GameContainer implements EventListener {
             pig.clearVoter();
         }
 // Start Puzzle
+        gameState = GameState.PUZZLE;
 
+        correctHeadline = headlineData.GetRandomRealHeadline();
+        correctAnswer = correctHeadline.GetText();
+        components.clear();
+        componentTypes.clear();
+        correctHeadline.GetComponents().forEach((a, b) -> {
+            components.add(b);
+            componentTypes.add(a);
+        });
 
-        jda.shutdown();
-        System.exit(0);
+        // Missing Component
+        components.set((int) (Math.random() * components.size()), null);
+
         EmbedBuilder puzzleEBuilder;
-        for (Player pig : playersInGame) {
-            puzzleEBuilder = new EmbedBuilder().setColor(0xa0a0a0);
-            int m = 5;
-            for (int i = 0; i < m; i++) {
-                puzzleEBuilder.addField(":regional_indicator_" + (char) (i + 'a') + ":", "phrase number " + (i + 1), true);
-            }
-            for (int i = 0; i < 3 - (m % 3); i++) { // fill the empty spaces (embeds can only by three inline)
-                puzzleEBuilder.addBlankField(true);
-            }
 
-            Message wordsMessage = pig.getUser().openPrivateChannel().complete().sendMessage(puzzleEBuilder.build()).complete();
-            for (int i = 0; i < 5; i++) {
-                wordsMessage.addReaction("U+" + Integer.toHexString(UNICODE_A + i)).queue();
-            }
-            pig.setPuzzleMessageId(wordsMessage.getIdLong());
-        }
-        for (Player pig : playersInGame) {
-            puzzleEBuilder = new EmbedBuilder().setColor(0xa0a0a0);
-            int m = 5;
-            for (int i = 0; i < m; i++) {
-                puzzleEBuilder.addField(":regional_indicator_" + (char) (i + 'a') + ":", "word_" + (i + 1), true);
-            }
-            for (int i = 0; i < 3 - (m % 3); i++) { // fill the empty spaces (embeds can only by three inline)
-                puzzleEBuilder.addBlankField(true);
-            }
+        for (int j = 0; j < components.size(); j++) {
+            String s = components.get(j);
+            if (s == null) {
+                String ct = componentTypes.get(j);
+                for (Player pig : playersInGame) {
+                    puzzleEBuilder = new EmbedBuilder().setColor(0xa0a0a0);
+                    pig.setPossibleComponents(ct, new ArrayList<>());
+                    for (int i = 0; i < comPerGap; i++) {
+                        pig.getPossibleComponents(ct).add(headlineData.GetRandomHeadlineComponent(ct));
+                    }
+                    for (int i = 0; i < comPerGap; i++) {
+                        puzzleEBuilder.addField(":regional_indicator_" + (char) (i + 'a') + ":", pig.getPossibleComponents(ct).get(i), true);
+                    }
+                    for (int i = 0; i < 3 - (comPerGap % 3); i++) { // fill the empty spaces (embeds can only by three inline)
+                        puzzleEBuilder.addBlankField(true);
+                    }
+                    puzzleEBuilder.addBlankField(false);
 
-            Message wordsMessage = pig.getUser().openPrivateChannel().complete().sendMessage(puzzleEBuilder.build()).complete();
-            for (int i = 0; i < 5; i++) {
-                wordsMessage.addReaction("U+" + Integer.toHexString(UNICODE_A + i)).queue();
+                    Message wordsMessage = pig.getUser().openPrivateChannel().complete().sendMessage(puzzleEBuilder.build()).complete();
+                    for (int i = 0; i < 5; i++) {
+                        wordsMessage.addReaction("U+" + Integer.toHexString(UNICODE_A + i)).queue();
+                    }
+                    pig.setMessageComponentType(wordsMessage.getIdLong(), componentTypes.get(j));
+                }
             }
-
         }
         EmbedBuilder solutionEBuilder;
         for (Player pig : playersInGame) {
-            solutionEBuilder = new EmbedBuilder().setColor(0xFFFF00).addField("Your current solution:", pig.getSubmittedHeadline(), false);
+            solutionEBuilder = new EmbedBuilder();
+            String pigHeadline = "";
+            for (int i = 0; i < components.size(); i++) {
+                if (components.get(i) == null) {
+                    if (pig.getSelectedComponent(componentTypes.get(i)) == null) {
+                        pigHeadline += "==?== ";
+                    } else {
+                        pigHeadline += pig.getSelectedComponent(componentTypes.get(i)) + " ";
+                    }
+                } else {
+                    pigHeadline += components.get(i) + " ";
+                }
+            }
+            solutionEBuilder.setColor(0xFFFF00);
+            solutionEBuilder.addField("Your current solution:", pigHeadline, false);
             pig.setPuzzleMessageId(pig.getUser().openPrivateChannel().complete().sendMessage(solutionEBuilder.build()).complete().getIdLong());
         }
+
         for (int i = 24; i >= 0; i--) { //TODO time depending on gaps
             int clock = (int) ((i / 24) * 12);
             for (Player pig : playersInGame) {
@@ -244,15 +262,18 @@ public class GameContainer implements EventListener {
                 MessageReactionAddEvent mrae = (MessageReactionAddEvent) event;
                 if (mrae.getUser() != null && Player.getById(mrae.getUser().getIdLong()) != null) {
                     Player player = Player.getById(mrae.getUser().getIdLong());
+
                     if (player.getGc() == this) {
                         if (mrae.getReactionEmote().isEmoji()) {
                             String emoji = mrae.getReaction().getReactionEmote().getAsCodepoints();
                             int selectedOption = Integer.parseInt(emoji.substring(2), 16) - UNICODE_A;
-                            if (selectedOption < 0) // TODO assert selectedOption is in right range
+
+                            if (selectedOption < 0 || selectedOption > (player.getPossibleComponents(player.getMessageComponentType(mrae.getMessageIdLong())).size())) { // TODO assert selectedOption is in right range
                                 mrae.getUser().openPrivateChannel().complete().sendMessage("Please vote one of the options.").complete();
-
-                            // TODO handle options
-
+                                return;
+                            }
+                            player.setSelectedComponent(player.getMessageComponentType(mrae.getMessageIdLong()), player.getPossibleComponents(player.getMessageComponentType(mrae.getMessageIdLong())).get(selectedOption));
+                            updatePuzzleMessage(player, mrae.getMessageIdLong());
                         }
                     }
                 }
@@ -351,32 +372,65 @@ public class GameContainer implements EventListener {
         this.gameState = gameState;
     }
 
+    private void updatePuzzleMessage(Player p, long messageId) {
+        for (int j = 0; j < components.size(); j++) {
+            String s = components.get(j);
+            if (s == null) {
+                String ct = componentTypes.get(j);
+                EmbedBuilder puzzleEBuilder = new EmbedBuilder().setColor(0xa0a0a0);
+                p.setPossibleComponents(ct, new ArrayList<>());
+                for (int i = 0; i < comPerGap; i++) {
+                    p.getPossibleComponents(ct).add(headlineData.GetRandomHeadlineComponent(ct));
+                }
+                for (int i = 0; i < comPerGap; i++) {
+                    puzzleEBuilder.addField(":regional_indicator_" + (char) (i + 'a') + ":", p.getPossibleComponents(ct).get(i), true);
+                }
+                for (int i = 0; i < 3 - (comPerGap % 3); i++) { // fill the empty spaces (embeds can only by three inline)
+                    puzzleEBuilder.addBlankField(true);
+                }
+                puzzleEBuilder.addBlankField(false);
+
+                p.getUser().openPrivateChannel().complete().editMessageById(messageId, puzzleEBuilder.build()).complete();
+            }
+
+        }
+        EmbedBuilder solutionEBuilder = new EmbedBuilder();
+
+        solutionEBuilder.setColor(0xFFFF00);
+        solutionEBuilder.addField("Your current solution:", getPlayerHeadline(p), false);
+        p.getUser().openPrivateChannel().complete().editMessageById(p.getPuzzleMessageId(), solutionEBuilder.build()).complete();
+
+
+    }
 
     private void updateVoteMessages() {
         EmbedBuilder voteEBuilder = new EmbedBuilder();
-        voteEBuilder.setColor(0x0050F0);
-        voteEBuilder.setTitle("Vote the real headline:");
         for (int i = 0; i < voteResult.length; i++) {
-            String voterString = "";
-            for (Player pig : (voteResult[i] == null ? correctVoters : voteResult[i].getVoters())) {
-                voterString += "> " + pig.getUser().getName() + "\n";
-            }
             if (voteResult[i] == null) {
-                voteEBuilder.addField(":regional_indicator_" + (char) (i + 'a') + ": (" + correctVoters.size() + ")", correctAnswer, true);
+                voteEBuilder.addField(":regional_indicator_" + (char) (i + 'a') + ":", correctAnswer, false);
             } else {
-                voteEBuilder.addField(":regional_indicator_" + (char) (i + 'a') + ": (" + voteResult[i].getVoters().size() + ")", voteResult[i].getSubmittedHeadline(), true);
+                voteEBuilder.addField(":regional_indicator_" + (char) (i + 'a') + ":", getPlayerHeadline(voteResult[i]), false);
             }
-            voteEBuilder.addBlankField(true);
-            voteEBuilder.addField("Voters:", voterString, true);
-            // voteEBuilder.addBlankField(false);
         }
 
         for (Player pig : playersInGame) {
-            if (pig.getVotedTarget() != -1)
-                voteEBuilder.setDescription("You voted: :regional_indicator_" + (char) (pig.getVotedTarget() + 'a') + ":");
-            else
-                voteEBuilder.setDescription("");
-            pig.getUser().openPrivateChannel().complete().editMessageById(pig.getVoteMessageId(), voteEBuilder.build()).queue();
+            pig.getUser().openPrivateChannel().complete().editMessageById(pig.getVoteMessageId(), voteEBuilder.build()).complete();
         }
+    }
+
+    private String getPlayerHeadline(Player p) {
+        String pigHeadline = "";
+        for (int i = 0; i < components.size(); i++) {
+            if (components.get(i) == null) {
+                if (p.getSelectedComponent(componentTypes.get(i)) == null) {
+                    pigHeadline += "==?== ";
+                } else {
+                    pigHeadline += p.getSelectedComponent(componentTypes.get(i)) + " ";
+                }
+            } else {
+                pigHeadline += components.get(i) + " ";
+            }
+        }
+        return pigHeadline;
     }
 }

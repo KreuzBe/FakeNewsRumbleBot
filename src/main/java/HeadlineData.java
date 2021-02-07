@@ -1,61 +1,60 @@
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.IOException;
-import java.util.Iterator;
-import java.util.HashMap;
-import java.util.ArrayList;
-
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
-import org.json.simple.parser.*;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
+
+import java.io.FileReader;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
 
 public class HeadlineData {
 
     public static final String[] componentTypes =
             {"actor", "action", "object", "descriptor"};
 
-    private ArrayList<RealHeadline> realHeadlines;
+    private ArrayList<RealHeadline> realHeadlineList;
     private HashMap<String, ArrayList<String>> components;
 
     public HeadlineData() throws IOException, ParseException {
-        realHeadlines = new ArrayList<RealHeadline>();
+        realHeadlineList = new ArrayList<RealHeadline>();
         components = new HashMap<String, ArrayList<String>>();
         FileReader fileReader = new FileReader("assets/RealHeadlines.json");
         // parsing file "RealHeadlines.json"
         JSONObject realHeadlinesJSON = (JSONObject) new JSONParser().parse(fileReader);
         JSONArray realHeadlines = (JSONArray) realHeadlinesJSON.get("headlines");
-        Iterator arrayItr = realHeadlines.iterator();
-        while (arrayItr.hasNext()) {
-            // save the data about the headline in a map            
-            HashMap<String, String> headlineMap = (HashMap) arrayItr.next();
+
+        for (Object headline : realHeadlines) {
+            // save the data about the headline in a map
+            JSONObject headlineMap = (JSONObject) headline;
 
             // transfer data from map to headline object and component dictionary
             RealHeadline realHeadline = new RealHeadline();
-            for (int i = 0; i < componentTypes.length; i++) {
-                String componentText = headlineMap.get(componentTypes[i]);
+            for (String componentType : componentTypes) {
+                String componentText = (String) headlineMap.get(componentType);
                 if (componentText != null) {
-                    realHeadline.AddComponent(componentTypes[i], componentText);
-                    ArrayList<String> componentsOfType = components.get(componentTypes[i]);
+                    realHeadline.AddComponent(componentType, componentText);
+                    ArrayList<String> componentsOfType = components.get(componentType);
                     if (componentsOfType == null) {
                         componentsOfType = new ArrayList<String>();
                     }
                     componentsOfType.add(componentText);
-                    components.put(componentTypes[i], componentsOfType);
+                    components.put(componentType, componentsOfType);
                 }
             }
-            String link = headlineMap.get("link");
+            String link = (String) headlineMap.get("link");
             if (link != null) {
                 realHeadline.SetLink(link);
             }
 
             // add headline object to list
-            realHeadlines.add(realHeadline);
+            realHeadlineList.add(realHeadline);
         }
     }
 
     public RealHeadline GetRandomRealHeadline() {
-        int randIndex = (int) Math.floor(Math.random() * realHeadlines.size());
-        return realHeadlines.get(randIndex);
+        int randIndex = (int) Math.floor(Math.random() * realHeadlineList.size());
+        return realHeadlineList.get(randIndex);
     }
 
     public String GetRandomHeadlineComponent(String componentType) {
