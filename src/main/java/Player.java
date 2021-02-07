@@ -15,6 +15,8 @@ public class Player {
     private long puzzleMessageId;
     private long voteMessageId;
     private long resultMessageId;
+    private long pregameMessageId;
+    private boolean skip = false;
 
     private String submittedHeadline = "Fake news";
 
@@ -44,6 +46,14 @@ public class Player {
         possibleComponents.clear();
         voters.clear();
         messageCT.clear();
+    }
+
+    public boolean shouldSkip() {
+        return skip;
+    }
+
+    public void setSkip(boolean skip) {
+        this.skip = skip;
     }
 
     public GameContainer getGc() {
@@ -92,6 +102,14 @@ public class Player {
 
     public void setResultMessageId(long resultMessageId) {
         this.resultMessageId = resultMessageId;
+    }
+
+    public long getPregameMessageId() {
+        return pregameMessageId;
+    }
+
+    public void setPregameMessageId(long pregameMessageId) {
+        this.pregameMessageId = pregameMessageId;
     }
 
     public String getSubmittedHeadline() {
@@ -161,14 +179,6 @@ public class Player {
 
     public String getMessageComponentType(long id) {
         return messageCT.get(id);
-    }
-
-    public long getMessageComponentType(String ct) {
-        for (Map.Entry<Long, String> e : messageCT.entrySet()) {
-            if (e.getValue().equals(ct))
-                return e.getKey();
-        }
-        return 0;
     }
 
     /**

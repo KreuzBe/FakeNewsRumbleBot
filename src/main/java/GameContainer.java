@@ -11,13 +11,15 @@ import org.json.simple.parser.ParseException;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Comparator;
 
 public class GameContainer implements EventListener {
     private final static int UNICODE_A = 0x1f1e6; // A is the first letter of the alphabet.
+    private final static String UNICODE_OK = "U+1F197";
 
     private static HeadlineData headlineData;
 
-    public enum GameState {LOBBY, PUZZLE, VOTE, REVEAL}
+    public enum GameState {LOBBY, PREGAME, PUZZLE, VOTE, REVEAL}
 
     private JDA jda; // JDA required by discord bot
     private ArrayList<Player> playersInGame = new ArrayList<>(); // all participants in current game
@@ -27,9 +29,6 @@ public class GameContainer implements EventListener {
     private int maxPlayers = 2;
 
     int comPerGap = 6;
-
-
-    //TODO clear last time
 
     private GameState gameState = GameState.LOBBY;
 
@@ -55,8 +54,46 @@ public class GameContainer implements EventListener {
 
     private void startGame() {
         System.out.println("Starting the game");
-        Thread waitingThread = new Thread(this::puzzle);
+        Thread waitingThread = new Thread(this::initGame);
         waitingThread.start();
+    }
+
+    private void initGame() {
+        gameState = GameState.PREGAME;
+        EmbedBuilder helpEBuilder = new EmbedBuilder().setColor(0xFF0000)
+                .setDescription("Press OK to skip")
+                .setTitle("How to play:")
+                .addField("Make up your own headline!", "In the first phase of the game, you get a headline with a gap and a word pallet to chose from. The words can be selected by adding a reaction with the corresponding letter to the word list. The selected word is put in the gap. After a certain time, you are not able to select another word. Then the next phase begins.", false)
+                .addField("Find the correct headline!", "Now, you get multiple headlines similar to each other. These are the ones created by the other players and the \"real\" headline we got from the internet. You have to choose which headline is the real one, by adding a reaction with the corresponding letter. After a certain time, you are not able to choose. ", false)
+                .addField("Seeing the results:", "You get a overview about what points you scored (you fooled other players or guessed the right headline). You now get to see the original headline and a link to the page it appeared on. In case there are multiple rounds, the next one starts after a certain time.", false);
+
+        for (Player pig : playersInGame) {
+            Message m = pig.getUser().openPrivateChannel().complete().sendMessage(helpEBuilder.build()).complete();
+            m.addReaction(UNICODE_OK).queue();
+            pig.setPregameMessageId(m.getIdLong());
+
+        }
+
+        int time = 24;
+        for (int i = time; i >= 0; i--) {
+            int clock = (int) ((i / (time * 1f)) * 12);
+            boolean skip = true;
+            for (Player pig : playersInGame) {
+                pig.getUser().openPrivateChannel().complete().editMessageById(pig.getPregameMessageId(), "Time left: :clock" + (clock == 0 ? 12 : clock) + ": (" + i + ")").complete();
+                if (!pig.shouldSkip()) {
+                    skip = false;
+                }
+            }
+            if (skip) {
+                break;
+            }
+            try {
+                Thread.sleep(1000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+        puzzle();
     }
 
     private void puzzle() {
@@ -83,13 +120,11 @@ public class GameContainer implements EventListener {
         components.set((int) (Math.random() * components.size()), null);
 
         EmbedBuilder puzzleEBuilder;
-
         for (int j = 0; j < components.size(); j++) {
             String s = components.get(j);
             if (s == null) {
                 String ct = componentTypes.get(j);
                 for (Player pig : playersInGame) {
-                    puzzleEBuilder = new EmbedBuilder().setColor(0xa0a0a0);
                     pig.setPossibleComponents(ct, new ArrayList<>());
 
                     for (int i = 0; i < comPerGap; i++) {
@@ -110,19 +145,6 @@ public class GameContainer implements EventListener {
                         } while (!isNewComp);
                         pig.getPossibleComponents(ct).add(comp);
                     }
-                    for (int i = 0; i < comPerGap; i++) {
-                        puzzleEBuilder.addField(":regional_indicator_" + (char) (i + 'a') + ":", pig.getPossibleComponents(ct).get(i), true);
-                    }
-                    for (int i = 0; i < 3 - (comPerGap % 3); i++) { // fill the empty spaces (embeds can only by three inline)
-                        puzzleEBuilder.addBlankField(true);
-                    }
-                    //  puzzleEBuilder.addBlankField(false);
-
-                    Message wordsMessage = pig.getUser().openPrivateChannel().complete().sendMessage(puzzleEBuilder.build()).complete();
-                    for (int i = 0; i < comPerGap; i++) {
-                        wordsMessage.addReaction("U+" + Integer.toHexString(UNICODE_A + i)).queue();
-                    }
-                    pig.setMessageComponentType(wordsMessage.getIdLong(), componentTypes.get(j));
                 }
             }
         }
@@ -130,12 +152,39 @@ public class GameContainer implements EventListener {
         for (Player pig : playersInGame) {
             solutionEBuilder = new EmbedBuilder();
             solutionEBuilder.setColor(0xFFFF00);
-            solutionEBuilder.addField("Your current solution:", "```" + getPlayerHeadline(pig, true) + "```", false);
+            solutionEBuilder.addField("Your current headline:", "**" + getPlayerHeadline(pig, true) + "**", false);
             pig.setPuzzleMessageId(pig.getUser().openPrivateChannel().complete().sendMessage(solutionEBuilder.build()).complete().getIdLong());
         }
+        for (int j = 0; j < components.size(); j++) {
+            String s = components.get(j);
+            if (s == null) {
+                String ct = componentTypes.get(j);
+                for (Player pig : playersInGame) {
+                    puzzleEBuilder = new EmbedBuilder().setColor(0xa0a0a0);
 
-        for (int i = 24; i >= 0; i--) { //TODO time depending on gaps
-            int clock = (int) ((i / 24f) * 12);
+                    for (int i = 0; i < comPerGap; i++) {
+                        puzzleEBuilder.addField(":regional_indicator_" + (char) (i + 'a') + ":", pig.getPossibleComponents(ct).get(i), true);
+                    }
+                    for (int i = 0; i < 3 - (comPerGap % 3); i++) { // fill the empty spaces (embeds can only by three inline)
+                        puzzleEBuilder.addBlankField(true);
+                    }
+
+                    puzzleEBuilder.setDescription("Choose one of the following words to replace the gap:");
+
+                    Message wordsMessage = pig.getUser().openPrivateChannel().complete().sendMessage(puzzleEBuilder.build()).complete();
+                    for (int i = 0; i < comPerGap; i++) {
+                        wordsMessage.addReaction("U+" + Integer.toHexString(UNICODE_A + i)).queue();
+                    }
+                    pig.setMessageComponentType(wordsMessage.getIdLong(), componentTypes.get(j));
+                    updatePuzzleMessage(pig, wordsMessage.getIdLong());
+                }
+            }
+        }
+
+
+        int time = 18;
+        for (int i = time; i >= 0; i--) {
+            int clock = (int) ((i / (time * 1f)) * 12);
             for (Player pig : playersInGame) {
                 pig.getUser().openPrivateChannel().complete().editMessageById(pig.getPuzzleMessageId(), "Time left: :clock" + (clock == 0 ? 12 : clock) + ": (" + i + ")").complete();
             }
@@ -173,6 +222,7 @@ public class GameContainer implements EventListener {
 
             }
         }
+        voteEBuilder.setDescription("Choose the \"original\" headline that appeared on a website:");
         MessageEmbed voteEmbed = voteEBuilder.build();
         for (Player pig : playersInGame) {
             Message voteMessage = pig.getUser().openPrivateChannel().complete().sendMessage(voteEmbed).complete();
@@ -183,10 +233,22 @@ public class GameContainer implements EventListener {
         }
         updateVoteMessages();
 
-        for (int i = 12; i >= 0; i--) {
-            int clock = (int) ((i / 12f) * 12);
+        int time = 12 + 3 * playersInGame.size();
+        for (int i = time; i >= 0; i--) {
+            int clock = (int) ((i / (time * 1f)) * 12);
+
+            boolean everyoneHasVoted = true;
             for (Player pig : playersInGame) {
                 pig.getUser().openPrivateChannel().complete().editMessageById(pig.getVoteMessageId(), "Time left: :clock" + (clock == 0 ? 12 : clock) + ": (" + i + ")").complete();
+                if (pig.getVotedTarget() == -1) {
+                    everyoneHasVoted = false;
+                }
+            }
+            if (everyoneHasVoted) {
+                for (Player pig : playersInGame) {
+                    pig.getUser().openPrivateChannel().complete().editMessageById(pig.getVoteMessageId(), "Everyone has voted. Continuing...").complete();
+                }
+                break;
             }
             try {
                 Thread.sleep(1000);
@@ -234,18 +296,28 @@ public class GameContainer implements EventListener {
         }
         if (currentRound == maxRounds) {
             //TODO END GAME
+            playersInGame.sort((a, b) -> Integer.compare(b.getScore(), a.getScore()));
+            EmbedBuilder scoreEBuilder = new EmbedBuilder().setColor(0xFFFFFF);
+            scoreEBuilder.setTitle("Scoreboard:");
+            scoreEBuilder.setDescription("Winner is " + playersInGame.get(0).getUser().getName());
             for (Player pig : playersInGame) {
-                pig.getUser().openPrivateChannel().complete().sendMessage("The game is now over\nYou have " + pig.getScore() + " points!").complete();
+                scoreEBuilder.addField(pig.getUser().getName(), (pig.getScore() > 0 ? "+" : "-") + Math.abs(pig.getScore()), false);
+            }
+            for (Player pig : playersInGame) {
+                pig.getUser().openPrivateChannel().complete().sendMessage(scoreEBuilder.build()).complete();
                 pig.removeFromCache();
             }
             Main.resetGame();
             return;
         }
-        for (int i = 6; i >= 0; i--) {
-            int clock = (int) ((i / 6f) * 12);
+        int time = 6;
+        for (int i = time; i >= 0; i--) {
+            int clock = (int) ((i / (time * 1f)) * 12);
             for (Player pig : playersInGame) {
                 pig.getUser().openPrivateChannel().complete().editMessageById(pig.getResultMessageId(), "Time left: :clock" + (clock == 0 ? 12 : clock) + ": (" + i + ")").complete();
             }
+
+
             try {
                 Thread.sleep(1000);
             } catch (InterruptedException e) {
@@ -262,7 +334,24 @@ public class GameContainer implements EventListener {
 
     @Override
     public void onEvent(@NotNull GenericEvent event) {
-        if (gameState == GameState.PUZZLE) {
+        if (gameState == GameState.PREGAME) {
+            if (event instanceof MessageReactionAddEvent) {
+                MessageReactionAddEvent mrae = (MessageReactionAddEvent) event;
+                if (mrae.getUser() != null && Player.getById(mrae.getUser().getIdLong()) != null) {
+                    Player player = Player.getById(mrae.getUser().getIdLong());
+
+                    if (player.getGc() == this) {
+                        if (mrae.getReactionEmote().isEmoji()) {
+                            String emoji = mrae.getReaction().getReactionEmote().getAsCodepoints();
+                            if (emoji.equalsIgnoreCase(UNICODE_OK)) {
+                                System.out.println("skipped");
+                                player.setSkip(true);
+                            }
+                        }
+                    }
+                }
+            }
+        } else if (gameState == GameState.PUZZLE) {
             if (event instanceof MessageReactionAddEvent) {
                 MessageReactionAddEvent mrae = (MessageReactionAddEvent) event;
                 if (mrae.getUser() != null && Player.getById(mrae.getUser().getIdLong()) != null) {
@@ -294,7 +383,6 @@ public class GameContainer implements EventListener {
                     if (mrae.getReactionEmote().isEmoji()) {
                         String emoji = mrae.getReaction().getReactionEmote().getAsCodepoints();
                         int vote = Integer.parseInt(emoji.substring(2), 16) - UNICODE_A;
-                        System.out.println(vote);
                         if (vote < 0 || vote >= voteResult.length) {
                             mrae.getUser().openPrivateChannel().complete().sendMessage("Please vote one of the options.").complete();
                         } else if (player.getVotedTarget() != -1) {
@@ -385,15 +473,18 @@ public class GameContainer implements EventListener {
                 EmbedBuilder puzzleEBuilder = new EmbedBuilder().setColor(0xa0a0a0);
 
                 for (int i = 0; i < comPerGap; i++) {
-                    if (p.getSelectedComponent(ct).equals(p.getPossibleComponents(ct).get(i)))
+                    if (p.getSelectedComponent(ct) != null && p.getSelectedComponent(ct).equals(p.getPossibleComponents(ct).get(i)))
                         puzzleEBuilder.addField(":regional_indicator_" + (char) (i + 'a') + ": [selected]", p.getPossibleComponents(ct).get(i), true);
                     else
                         puzzleEBuilder.addField(":regional_indicator_" + (char) (i + 'a') + ":", p.getPossibleComponents(ct).get(i), true);
                 }
-                for (int i = 0; i < 3 - (comPerGap % 3); i++) { // fill the empty spaces (embeds can only by three inline)
-                    puzzleEBuilder.addBlankField(true);
+                if (comPerGap % 3 != 0) {
+                    for (int i = 0; i < 3 - (comPerGap % 3); i++) { // fill the empty spaces (embeds can only by three inline)
+                        puzzleEBuilder.addBlankField(true);
+                    }
                 }
-//                puzzleEBuilder.addBlankField(false);
+
+                puzzleEBuilder.setDescription("Choose one of the following words to replace the gap:");
 
                 p.getUser().openPrivateChannel().complete().editMessageById(messageId, puzzleEBuilder.build()).complete();
             }
@@ -402,7 +493,7 @@ public class GameContainer implements EventListener {
         EmbedBuilder solutionEBuilder = new EmbedBuilder();
 
         solutionEBuilder.setColor(0xFFFF00);
-        solutionEBuilder.addField("Your current solution:", "**" + getPlayerHeadline(p, true) + "**", false);
+        solutionEBuilder.addField("Your current headline:", "**" + getPlayerHeadline(p, true) + "**", false);
         p.getUser().openPrivateChannel().complete().editMessageById(p.getPuzzleMessageId(), solutionEBuilder.build()).complete();
 
 
@@ -426,7 +517,7 @@ public class GameContainer implements EventListener {
                 voteEBuilder.addField(" ", voterString, true);
                 voteEBuilder.addBlankField(false);
             }
-
+            voteEBuilder.setDescription("Choose the \"original\" headline that appeared on a website:");
             pig.getUser().openPrivateChannel().complete().editMessageById(pig.getVoteMessageId(), voteEBuilder.build()).complete();
         }
     }
