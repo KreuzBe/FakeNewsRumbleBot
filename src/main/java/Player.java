@@ -38,6 +38,14 @@ public class Player {
         submittedHeadline = submittedHeadline.concat(" " + user.getDiscriminator());
     }
 
+    public void nextRound() {
+        voteTarget = -1;
+        selectedComponents.clear();
+        possibleComponents.clear();
+        voters.clear();
+        messageCT.clear();
+    }
+
     public GameContainer getGc() {
         return gc;
     }

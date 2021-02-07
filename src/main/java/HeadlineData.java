@@ -11,7 +11,7 @@ import java.util.HashMap;
 public class HeadlineData {
 
     public static final String[] componentTypes =
-            {"actor", "action", "object", "descriptor"};
+            {"actor", "action","action_upon", "object", "descriptor"};
 
     private ArrayList<RealHeadline> realHeadlineList;
     private HashMap<String, ArrayList<String>> components;
