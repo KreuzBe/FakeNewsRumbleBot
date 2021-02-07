@@ -1,77 +1,164 @@
 {
   "headlines": [
     {
-      "text": "Canberra Man Takes Three Months to Discover $1.6 Million Saturday Lotto Win Tucked Away in His Drawer",
       "actor": "Canberra Man",
-      "action": "Takes Three Months to Discover",
+      "action_upon": "Takes Three Months to Discover",
       "object": "$1.6 Million Saturday Lotto Win",
       "descriptor": "Tucked Away in His Drawer",
-      "link": "https://mediacentre.thelott.com/media-releases/canbedescriptorrra-man-takes-three-months-to-discover-saturday-lotto-win-tucked-away-in-his-drawer/"
+      "link": "https://mediacentre.thelott.com/media-releases/canberra-man-takes-three-months-to-discover-saturday-lotto-win-tucked-away-in-his-drawer/"
     },
     {
-      "text": "Norwegian runner sets world record for fastest barefoot half-marathon on snow",
-      "actor": "Norwegian runner",
-      "action": "sets world record for",
-      "object": "fastest barefoot half-marathon",
+      "actor": "Norwegian Runner",
+      "action_upon": "Sets World Record for",
+      "object": "Fastest Barefoot Half-Marathon",
       "descriptor": "on snow",
       "link": "https://runningmagazine.ca/sections/runs-races/norwegian-runner-sets-world-record-for-fastest-barefoot-half-marathon-on-snow/"
     },
     {
-      "text": "94-year-old Canadian man confirmed as oldest male waterskier ",
-      "actor": "94-year-old Canadian man",
-      "action": "confirmed as",
-      "object": "oldest male waterskier",
-      "link": "https://www.guinnessworldrecodescriptorrds.com/news/2021/2/94-year-old-canadian-man-confirmed-as-oldest-male-water-skier-647747"
+      "actor": "94-year-old Canadian Man",
+      "action_upon": "Confirmed as",
+      "object": "Oldest Male Waterskier",
+      "link": "https://www.guinnessworldrecords.com/news/2021/2/94-year-old-canadian-man-confirmed-as-oldest-male-water-skier-647747"
     },
     {
-      "text": "Viral Fresno Tik Tok video helps woman find missing package",
-      "actor": "Viral Fresno Tik Tok video",
-      "action": "helps woman find",
-      "object": "missing package",
+      "actor": "Viral Fresno Tik Tok Video",
+      "action_upon": "Helps Woman Find",
+      "object": "Missing Package",
       "link": "https://kmph.com/news/local/viral-fresno-tik-tok-video-helps-woman-find-missing-package"
     },
     {
-      "text": "Spectacular display of origami dogs sets a record in Brazil",
-      "actor": "Spectucular display of origami dogs",
-      "action": "sets a record",
+      "actor": "Spectacular Display of Origami Dogs",
+      "action": "Sets a Record",
       "descriptor": "in Brazil",
       "link": "https://www.guinnessworldrecords.com/news/2021/2/spectacular-display-of-origami-dogs-sets-a-record-in-brazil"
     },
     {
-      "text": "Cactus smuggler sentenced for importing illegal plants",
-      "actor": "Cactul smuggler",
-      "action": "sentenced for importing",
-      "descriptor": "illegal plants",
-      "link": "https://www.mpi.govt.nz/news/mediadescriptor-releases/cactus-smuggler-sentenced-for-importing-illegal-plants/"
+      "actor": "Cactus Smuggler",
+      "action_upon": "Sentenced for Importing",
+      "object": "Illegal Plants",
+      "link": "https://www.mpi.govt.nz/news/media-releases/cactus-smuggler-sentenced-for-importing-illegal-plants/"
     },
     {
-      "text": "10-foot gator removed from lake in Plantation neighborhood",
-      "actor": "10-foot gator",
-      "action": "removed from lake",
-      "descriptor": "in Plantation neighborhood",
+      "actor": "10-Foot Gator",
+      "action": "Removed From Lake",
+      "descriptor": "in Plantation Neighborhood",
       "link": "https://www.local10.com/news/local/2021/02/02/10-foot-gator-removed-from-lake-in-plantation-neighborhood/"
     },
     {
-      "text": "4-year-old discovers dinosaur footprint on the beach",
-      "actor": "4-year-old",
-      "action": "discovers",
-      "object": "dinosaur",
-      "descriptor": "on the beach",
+      "actor": "4-Year-Old",
+      "action_upon": "Discovers",
+      "object": "Dinosaur",
+      "descriptor": "on the Beach",
       "link": "https://www.cbc.ca/radio/asithappens/as-it-happens-monday-edition-1.5896324/daddy-look-at-this-4-year-old-discovers-dinosaur-footprint-on-the-beach-1.5896347"
     },
     {
-      "text": "Sebastian Man Finds Message in a Bottle on Beach",
       "actor": "Sebastian Man",
-      "action": "Finds",
+      "action_upon": "Finds",
       "object": "Message",
       "descriptor": "in a Bottle on Beach",
       "link": "https://www.sebastiandaily.com/inlet/sebastian-man-finds-message-in-a-bottle-on-beach-27147/"
     },
     {
-      "text": "The claim: Biden said, 'I don’t know what I’m signing here' while signing a document",
       "actor": "The claim: Biden",
-      "action": "Said, 'I don’t know what I’m signing here' While Signing a Document",
+      "action": "Said, 'I Don't Know What I'm Signing Here'",
+      "descriptor": "While Signing a Document",
       "link": "https://eu.usatoday.com/story/news/factcheck/2021/02/04/fact-check-experts-say-audio-biden-signing-ceremony-unclear/4372584001/"
+    },
+    {
+      "actor": "Police: Three People",
+      "action": "Dead",
+      "descriptor": "Following Dispute Over Shoveling Snow",
+      "link": "https://whdh.com/news/police-3-people-dead-following-dispute-over-shoveling-snow/"
+    },
+    {
+      "actor": "Oklahoma Rep.",
+      "action": "Files Bill",
+      "descriptor": "to Establish Bigfoot Hunting Season",
+      "link": "https://ktul.com/news/local/oklahoma-rep-files-bill-to-establish-bigfoot-hunting-season"
+    },
+    {
+      "actor": "YouPorn",
+      "action_upon": "Bans",
+      "object": "Starbucks",
+      "descriptor": "After Starbucks Banned Porn",
+      "link": "https://www.newsweek.com/youporn-bans-starbucks-after-starbucks-banned-porn-1237981"
+    },
+    {
+      "actor": "Jeremy Clarkson",
+      "action": "Says He's Not Homophobic",
+      "descriptor": "Because He Watches Lesbian Porn",
+      "link": "https://gcn.ie/jeremy-clarkson-homophobic-lesbian-porn/"
+    },
+    {
+      "actor": "White House",
+      "action_upon": "Threatens to Fire",
+      "object": "Anyone Who tries to Quit",
+      "link": "https://americanindependent.com/white-house-threatens-to-fire-anyone-who-tries-to-quit/"
+    },
+    {
+      "actor": "German Teenager",
+      "action_upon": "Loses",
+      "object": "Driving Licence",
+      "descriptor": "After 49 Minutes",
+      "link": "https://www.bbc.com/news/world-europe-46288054"
+    },
+    {
+      "actor": "Sundar Pichai",
+      "action": "Had to Explain To Congress Why Googling 'Idiot' Turns Up Pictures of Trump",
+      "link": "https://www.theverge.com/2018/12/11/18136114/trump-idiot-image-search-result-sundar-pichai-google-congress-testimony"
+    },
+    {
+      "actor": "US poacher",
+      "action": "Sentenced to Watch Bambi",
+      "link": "https://www.bbc.com/news/world-us-canada-46597364"
+    },
+    {
+      "actor": "Dutch Court",
+      "action_upon": "Rejects",
+      "object": "Man's Request",
+      "descriptor": "to Be 20 Years Younger",
+      "link": "https://www.theguardian.com/world/2018/dec/03/dutch-court-rejects-emile-ratelband-request-20-years-younger"
+    },
+    {
+      "actor": "New Texas Law",
+      "action_upon": "Would Require",
+      "object": "Fetuses",
+      "descriptor": "to Have a Lawyer",
+      "link": "https://americanindependent.com/new-texas-law-fetused-lawyer-minors-abortion-rights/"
+    },
+    {
+      "actor": "Video: Man",
+      "action_upon": "Accused of Groping",
+      "object": "Paramedic",
+      "descriptor": "at Scene of Bronx Fire",
+      "link": "https://www.pix11.com/news/local-news/bronx/video-man-accused-of-groping-emt-at-scene-of-bronx-fire-was-having-a-seizure-da-says"
+    },
+    {
+      "actor": "Las Vegas Man",
+      "action_upon": "Arrested After Trying to Pull Over",
+      "object": "Cop",
+      "link": "https://www.lex18.com/news/national/las-vegas-man-arrested-after-trying-to-pull-over-cop"
+    },
+    {
+      "actor": "Police: Man",
+      "action_upon": "Killed While Filming",
+      "object": "Prank Robbery Video",
+      "descriptor": "for Youtube",
+      "link": "https://www.wkrn.com/news/police-1-killed-in-hermitage-shooting-2/"
+    },
+    {
+      "actor": "Nevada Bill",
+      "action_upon": "Would Allow",
+      "object": "Tech Companies",
+      "descriptor": "to Create Governments",
+      "link": "https://www.kcra.com/article/nevada-bill-would-allow-tech-companies-to-create-governments/35432880#"
+    },
+    {
+      "actor": "BT Bright Spot: The UofT Anthropology Department",
+      "action_upon": "Gets Mistaken for",
+      "object": "Anthropologie the Store",
+      "descriptor": "All the Time",
+      "link": "https://www.bttoronto.ca/videos/bt-bright-spot-the-uoft-anthropology-department-gets-mistaken-for-anthropologie-the-store-all-the-time/"
     }
   ]
 }
