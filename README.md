@@ -2,7 +2,7 @@
 
 This project was create in the CGN Game Jam.
 
-Thank you @athurkehrwald
+Thank you @arthurkehrwald
 
 If you want to play the game, pass the token of a discord bot as the first argument when running.
 
